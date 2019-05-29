@@ -1,0 +1,6 @@
+framework module Pods_TwelveTest {
+  umbrella header "Pods-TwelveTest-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -7,7 +7,25 @@
 		<key>TwelveTest.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>23</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>934847702285C9DC002A67D6</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>934847842285C9DD002A67D6</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>9348478F2285C9DE002A67D6</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>
