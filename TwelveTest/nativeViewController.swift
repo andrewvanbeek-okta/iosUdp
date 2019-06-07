@@ -60,9 +60,15 @@ class NativeViewController: UIViewController {
                                                         }
                                                     } else {
                                                         var mfaStatus = OktaAuthStatus as! OktaAuthStatusFactorRequired
+                                                        mfaStatus.selectFactor(mfaStatus.availableFactors[0], onStatusChange: { OktaAuthStatus in
+                                                        
+                                                        }, onError: { OktaError in
+                                                            
+                                                        })
                                                         var id = mfaStatus.availableFactors[0].factor.id as! String
                                                         var stateToken = mfaStatus.stateToken as String
                                                         OktaAuthStatus.restApi.verifyFactor(factorId: id, stateToken: stateToken)
+                                                        
                                                     }
                                                 
                                                     //print(OktaAuthStatus.model.sessionToken!)

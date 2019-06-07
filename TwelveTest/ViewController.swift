@@ -26,8 +26,8 @@ class ViewController: UIViewController {
             }
             stateManager?.writeToSecureStorage()
             print(stateManager?.accessToken)
-            print(stateManager?.idToken)
             print(stateManager?.refreshToken)
+            stateManager?.writeToSecureStorage()
             DispatchQueue.main.async(){
                 var keychain = self.getKeyChain()
                 keychain["native"] = nil
@@ -45,16 +45,37 @@ class ViewController: UIViewController {
         signIn.layer.cornerRadius = 4
         videoBackground()
         setCustomLogo()
+        var config = self.getConfig()
+        guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
+            return
+        }
+        DispatchQueue.main.async(){
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+            if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "dataTab") as? UITabBarController {
+                self.present(viewController, animated: true, completion: nil)
+            }
+        }
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        var config = self.getConfig()
+        guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
+            return
+        }
+        DispatchQueue.main.async(){
+            let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+            if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "dataTab") as? UITabBarController {
+                self.present(viewController, animated: true, completion: nil)
+            }
+        }
+    }
+    
+   
     
     func setCustomLogo() {
         DispatchQueue.main.async(){
-            var keychain = self.getKeyChain()
-              print(keychain["image"])
-            if(keychain["image"] != nil) {
-                let url = URL(string: keychain["image"]!)
-                self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
-            }
+            self.logo.image = nil
         }
     }
     
@@ -76,45 +97,28 @@ extension UIViewController {
     }
     
     func addBackground() {
-        var keychain = self.getKeyChain()
-        if(keychain["theme"] != nil) {
-            var theme = keychain["theme"]! + ".jpg"
-            print(theme)
             let width = UIScreen.main.bounds.size.width
             let height = UIScreen.main.bounds.size.height
             let imageViewBackground = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
-            imageViewBackground.image = UIImage(named: theme)
-            print("HERE")
+            let url = URL(string: "https://cdn.glitch.com/55304711-9aab-4c43-821d-f5cd02214e8c%2Fmyrogers.png")
+            imageViewBackground.kf.setImage(with: url, placeholder: UIImage(named: "automative.jpg"))
             imageViewBackground.contentMode = UIView.ContentMode.scaleAspectFill
             self.view.addSubview(imageViewBackground)
             self.view.sendSubviewToBack(imageViewBackground)
-            
-        }
+        
     }
-  
+    
     
     func getOkta() -> OktaOidc {
         var config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://avb.oktapreview.com/oauth2/auskkfitx0l6SNY6R0h7",
-                "clientId": "0oakkch04alb3cucj0h7",
-                "redirectUri": "com.oktapreview.avb:/callback",
-                "logoutRedirectUri": "com.oktapreview.avb:/callback",
+                "issuer": "https://esfdevapi.rogers-poc.com/oauth2/ausnwvaq3hnainCu3356",
+                "clientId": "0oanctypwoJ1xupFd356",
+                "redirectUri": "com.okta.pocrogers:/callback",
+                "logoutRedirectUri": "com.okta.pocrogers:/callback",
                 "scopes": "openid profile offline_access"
                 ])
         }()
-        var keychain = self.getKeyChain()
-        if(keychain["url"] != nil) {
-            config = {
-                return try! OktaOidcConfig(with: [
-                    "issuer": keychain["url"]!,
-                    "clientId": keychain["clientId"]!,
-                    "redirectUri": keychain["redirectUri"]!,
-                    "logoutRedirectUri": keychain["logout"]!,
-                    "scopes": "openid profile offline_access"
-                    ])
-            }()
-        }
         
         var oktaOidc = {
             return try! OktaOidc(configuration: config)
@@ -154,39 +158,21 @@ extension UIViewController {
         }
     }
     
-
+    
     
     
     
     func getConfig() -> OktaOidcConfig {
-        print("TEST")
         var config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://avb.oktapreview.com/oauth2/auskkfitx0l6SNY6R0h7",
-                "clientId": "0oakkch04alb3cucj0h7",
-                "redirectUri": "com.oktapreview.avb:/callback",
-                "logoutRedirectUri": "com.oktapreview.avb:/callback",
+                "issuer": "https://esfdevapi.rogers-poc.com/oauth2/ausnwvaq3hnainCu3356",
+                "clientId": "0oanctypwoJ1xupFd356",
+                "redirectUri": "com.okta.pocrogers:/callback",
+                "logoutRedirectUri": "com.okta.pocrogers:/callback",
                 "scopes": "openid profile offline_access"
                 ])
         }()
-        var keychain = self.getKeyChain()
-        if(keychain["url"] != nil) {
-            config = {
-                return try! OktaOidcConfig(with: [
-                    "issuer": keychain["url"]!,
-                    "clientId": keychain["clientId"]!,
-                    "redirectUri": keychain["redirectUri"]!,
-                    "logoutRedirectUri": keychain["logout"]!,
-                    "scopes": "openid profile offline_access"
-                    ])
-            }()
-            print(config)
-            return config
-        } else {
-            print(config)
-            return config
-        }
-        
+        return config
     }
     
     
