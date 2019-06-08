@@ -18,18 +18,18 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var logo: UIImageView!
     @IBAction func login(_ sender: Any) {
-        var okta = self.getOkta()
+        let okta = self.getOkta()
         okta.signInWithBrowser(from: self) { stateManager, error in
             if let error = error {
                 print(error)
                 return
             }
             stateManager?.writeToSecureStorage()
-            print(stateManager?.accessToken)
-            print(stateManager?.refreshToken)
+            print(stateManager?.accessToken as Any)
+            print(stateManager?.refreshToken as Any)
             stateManager?.writeToSecureStorage()
             DispatchQueue.main.async(){
-                var keychain = self.getKeyChain()
+                let keychain = self.getKeyChain()
                 keychain["native"] = nil
                 let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
                 if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "dataTab") as? UITabBarController {
@@ -43,10 +43,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         signIn.layer.cornerRadius = 4
-        videoBackground()
+        addBackground()
         setCustomLogo()
-        var config = self.getConfig()
-        guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
+        let config = self.getConfig()
+        guard OktaOidcStateManager.readFromSecureStorage(for: config) != nil else {
             return
         }
         DispatchQueue.main.async(){
@@ -59,8 +59,8 @@ class ViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        var config = self.getConfig()
-        guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
+        let config = self.getConfig()
+        guard OktaOidcStateManager.readFromSecureStorage(for: config) != nil else {
             return
         }
         DispatchQueue.main.async(){
@@ -71,30 +71,14 @@ class ViewController: UIViewController {
         }
     }
     
-   
-    
     func setCustomLogo() {
         DispatchQueue.main.async(){
             self.logo.image = nil
         }
     }
-    
-    
 }
 
 extension UIViewController {
-    func videoBackground() {
-        var keychain = self.getKeyChain()
-        if(keychain["theme"] == "Default") {
-            let url = URL(string: "https://s3-us-west-2.amazonaws.com/appauth-mobile-app-media/city.mp4")!
-            VideoBackground.shared.play(view: view, url: url)
-        } else if(keychain["theme"] == "avbstyle") {
-            let url = URL(string: "https://cdn.glitch.com/55304711-9aab-4c43-821d-f5cd02214e8c%2Fneon.mp4?1557543110884")!
-            VideoBackground.shared.play(view: view, url: url)
-        } else {
-            self.addBackground()
-        }
-    }
     
     func addBackground() {
             let width = UIScreen.main.bounds.size.width
@@ -110,9 +94,9 @@ extension UIViewController {
     
     
     func getOkta() -> OktaOidc {
-        var config = {
+        let config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://esfdevapi.rogers-poc.com/oauth2/ausnwvaq3hnainCu3356",
+                "issuer": "https://pocrogers.okta.com/oauth2/default",
                 "clientId": "0oanctypwoJ1xupFd356",
                 "redirectUri": "com.okta.pocrogers:/callback",
                 "logoutRedirectUri": "com.okta.pocrogers:/callback",
@@ -120,7 +104,7 @@ extension UIViewController {
                 ])
         }()
         
-        var oktaOidc = {
+        let oktaOidc = {
             return try! OktaOidc(configuration: config)
         }()
         return oktaOidc
@@ -130,42 +114,10 @@ extension UIViewController {
         return Keychain(service: "com.avbGame.TwelveTest")
     }
     
-    func submitData(params: Dictionary<String, Any>) {
-        var url = "https://vanbeeklabs-mobile.herokuapp.com"
-        let parameters: Parameters = [
-            "resource": "doctors"
-        ]
-        
-        Alamofire.request(url,
-                          method: .post,
-                          parameters: params,
-                          encoding: URLEncoding(destination: .queryString))
-    }
-    
-    func getApi() -> String {
-        var keychain = self.getKeyChain()
-        switch keychain["theme"] {
-        case "travel":
-            return "flights"
-        case "healthcare":
-            return "doctors"
-        case "automative":
-            return "cars"
-        case .none:
-            return "avb"
-        case .some(_):
-            return "avb"
-        }
-    }
-    
-    
-    
-    
-    
     func getConfig() -> OktaOidcConfig {
-        var config = {
+        let config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://esfdevapi.rogers-poc.com/oauth2/ausnwvaq3hnainCu3356",
+                "issuer": "https://pocrogers.okta.com/oauth2/default",
                 "clientId": "0oanctypwoJ1xupFd356",
                 "redirectUri": "com.okta.pocrogers:/callback",
                 "logoutRedirectUri": "com.okta.pocrogers:/callback",

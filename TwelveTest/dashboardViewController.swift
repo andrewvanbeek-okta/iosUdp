@@ -25,7 +25,7 @@ class OktaDashboardViewController: FormViewController {
     
     func isThereAccessToken() {
         print("TEST TEST")
-        var config = self.getConfig()
+        let config = self.getConfig()
         guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
             print("no go")
             return
@@ -33,7 +33,7 @@ class OktaDashboardViewController: FormViewController {
         if(stateManager != nil) {
             if(!(stateManager.accessToken != nil)) {
                 stateManager.clear()
-                var oktaOidc = self.getOkta()
+                let oktaOidc = self.getOkta()
                 oktaOidc.signOutOfOkta(stateManager, from: self) { error in
                     if let error = error {
                         print(error)
@@ -60,9 +60,9 @@ class OktaDashboardViewController: FormViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.isThereAccessToken()
-        var config = self.getConfig()
+        let config = self.getConfig()
         config.clientId
-        var okta = self.getOkta()
+        let okta = self.getOkta()
         print(okta)
         guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
             print("no go")
@@ -70,15 +70,15 @@ class OktaDashboardViewController: FormViewController {
         }
         print(config)
         stateManager.getUser { response, error in
-            if let error = error {
+            if error != nil {
                 // Error
                 return
             }
-            print(response)
+            print(response as Any)
             DispatchQueue.main.async {
-                var responsObject = JSON(response)
+                var responsObject = JSON(response as Any)
                 var userInfo = responsObject.dictionaryValue
-                var keys = Array(userInfo.keys)
+                let keys = Array(userInfo.keys)
                 let section = Section()
                 var header = HeaderFooterView<UIView>(.class)
                 header.height = {300}
@@ -105,7 +105,7 @@ class OktaDashboardViewController: FormViewController {
                     }.onCellSelection { cell, row in
                         let alert = SCLAlertView()
                         let txt = alert.addTextField("Enter your name")
-                        var button = alert.addButton("Edit Email") {
+                        let button = alert.addButton("Edit Email") {
                             self.changeEmail(email: txt.text!)
                         }
                         button.backgroundColor = UIColor.red
@@ -116,12 +116,12 @@ class OktaDashboardViewController: FormViewController {
                     $0.title = "Sign Out"
                     }.onCellSelection {  cell, row in
                         
-                        var keychain = self.getKeyChain()
-                        var isNative = keychain[string: "native"]
+                        let keychain = self.getKeyChain()
+                        let isNative = keychain[string: "native"]
                         if(isNative != nil) {
                             self.performSegue(withIdentifier: "signOutFlow", sender: nil)
                         } else {
-                            var oktaOidc = self.getOkta()
+                            let oktaOidc = self.getOkta()
                             oktaOidc.signOutOfOkta(stateManager, from: self) { error in
                                 if let error = error {
                                     print(error)
@@ -145,25 +145,25 @@ class OktaDashboardViewController: FormViewController {
     
     func refresh(form: Form, stateManger: OktaOidcStateManager) {
         stateManger.renew { newAccessToken, error in
-            if let error = error {
+            if error != nil {
                 // Error
                 return
             }
             print("refresh")
             stateManger.getUser { response, error in
-                if let error = error {
+                if error != nil {
                     // Error
                     return
                 }
-                print(response)
+                print(response as Any)
                 if(stateManger != nil) {
                     if(stateManger.accessToken != nil) {
                         DispatchQueue.main.async {
-                            var responseObject = JSON(response)
+                            var responseObject = JSON(response as Any)
                             var userInfo = responseObject.dictionaryValue
-                            var keys = Array(userInfo.keys)
+                            let keys = Array(userInfo.keys)
                             keys.forEach { item in
-                                var row = form.rowBy(tag: item) as! TextRow
+                                let row = form.rowBy(tag: item) as! TextRow
                                 row.value = userInfo[item]?.rawString()
                                 row.reload()
                             }
@@ -176,27 +176,27 @@ class OktaDashboardViewController: FormViewController {
     
     func changeEmail(email: String) {
         
-        var config = self.getConfig()
+        let config = self.getConfig()
         guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
             print("no go")
             return
         }
         self.isThereAccessToken()
-        var accessToken = stateManager.accessToken
-        var token = accessToken as! String
-        var defEmail = email as! String
-        var parameters = ["token": token, "email": defEmail]
+        let accessToken = stateManager.accessToken
+        let token = accessToken as! String
+        let defEmail = email
+        let parameters = ["token": token, "email": defEmail]
         Alamofire.request("https://reset-password-okta.glitch.me/updateEmail", method: .post,parameters: parameters).responseJSON { response in
             if let json = response.result.value {
                 var jsonObject = JSON(json)
                 let alert = SCLAlertView()
                 var links = jsonObject["_links"]
                 var activateLink = links["activate"]
-                var codeHref = activateLink["href"].stringValue
+                let codeHref = activateLink["href"].stringValue
                 print(codeHref)
                 print(activateLink)
                 let txt = alert.addTextField("Enter Code")
-                var button = alert.addButton("Submit Code") {
+                let button = alert.addButton("Submit Code") {
                     self.submitCode(code: txt.text!, href: codeHref, email: email)
                 }
                 button.backgroundColor = UIColor.red
@@ -208,24 +208,24 @@ class OktaDashboardViewController: FormViewController {
     
     func submitCode(code: String, href: String, email: String) {
         
-        var config = self.getConfig()
+        let config = self.getConfig()
         guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
             print("no go")
             return
         }
-        var accessToken = stateManager.accessToken
-        var token = accessToken as! String
-        var code = code as! String
-        var url = href.trimmingCharacters(in: .whitespaces)
-        var parameters = ["token": token, "emailCode": code, "reqCodeLink": url, "email": email]
-        Alamofire.request("https://reset-password-okta.glitch.me/updateEmail", method: .post,parameters: parameters).responseJSON { response in
+        let accessToken = stateManager.accessToken
+        let token = accessToken as! String
+        let code = code as! String
+        let url = href.trimmingCharacters(in: .whitespaces) as! String
+        let parameters = ["token": token, "emailCode": code, "reqCodeLink": url, "email": email]
+        Alamofire.request("https://reset-password-okta.glitch.me/updateEmail", method: .post,parameters: parameters as Parameters).responseJSON { response in
             if let json = response.result.value {
-                var jsonObject = JSON(json)
+                let jsonObject = JSON(json)
                 print(jsonObject)
             }
             
             if let data = response.data, let utf8Text = String(data: data, encoding: .utf8) {
-                var jsonObject = JSON(response.data)
+                _ = JSON(response.data as Any)
                 //print(jsonObject.arrayValue)
             }
         }
