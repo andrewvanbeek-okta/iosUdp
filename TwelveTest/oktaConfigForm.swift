@@ -14,6 +14,7 @@ class OktaFormViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        var keychain = self.getKeyChain()
         form +++ Section("Section1")
             <<< TextRow("url"){ row in
                 row.title = "full okta issuer url"
@@ -48,11 +49,26 @@ class OktaFormViewController: FormViewController {
                 row.title = "custom logo url"
                 row.placeholder = "Enter image url"
             }
+            <<< TextRow("custombackground"){ row in
+                row.title = "custom background url"
+                row.placeholder = "Enter image url"
+            }
+            <<< TextRow("customcolor"){ row in
+                row.title = "custom color hex"
+                row.placeholder = "Enter color hex"
+            }
             <<< ActionSheetRow<String>("theme") {
-                $0.title = "ActionSheetRow"
+                $0.title = "Theme"
                 $0.selectorTitle = "Pick a number"
                 $0.options = ["healthcare","automative", "travel", "Default", "avbstyle"]
                 $0.value = "Default"    // initially selected
+            }
+        <<< SliderRow("logoroundness") { row in      // initializer
+            row.title = "Slider Row"
+            row.value = 10.0
+            }.onChange { row in
+                var intValue = Int(row.value!)
+                keychain["logoroundness"] = String(intValue)
             }
             <<< ButtonRow(){
                 $0.title = "Set"
@@ -66,7 +82,7 @@ class OktaFormViewController: FormViewController {
                     } else {
                         self.updateKeychain()
                     }
-            }
+        }
         self.updateOktaValues()
     }
     
@@ -81,7 +97,9 @@ class OktaFormViewController: FormViewController {
             let logoutRow = self.form.rowBy(tag: "logoutUri") as? RowOf<String>,
             let oktaUrlRow = self.form.rowBy(tag: "oktaurl") as? RowOf<String>,
             let imageUrlRow = self.form.rowBy(tag: "customlogo") as? RowOf<String>,
-            let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>
+            let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>,
+            let backgroundRow = self.form.rowBy(tag: "custombackground") as? RowOf<String>,
+            let colorRow = self.form.rowBy(tag: "customcolor") as? RowOf<String>
         {
             var keychain = self.getKeyChain()
             keychain["url"] = urlRow.value!.trimmingCharacters(in: .whitespaces)
@@ -95,6 +113,12 @@ class OktaFormViewController: FormViewController {
             if(themeRow.value != nil) {
                 keychain["theme"] = themeRow.value
             }
+            if(backgroundRow.value != nil) {
+                keychain["custombackground"] = backgroundRow.value!.trimmingCharacters(in: .whitespaces)
+            }
+            if(colorRow.value != nil) {
+                keychain["customcolor"] = colorRow.value!.trimmingCharacters(in: .whitespaces)
+            }
         }
     }
     
@@ -105,7 +129,10 @@ class OktaFormViewController: FormViewController {
             let logoutRow = self.form.rowBy(tag: "logoutUri") as? RowOf<String>,
             let oktaUrlRow = self.form.rowBy(tag: "oktaurl") as? RowOf<String>,
             let imageUrlRow = self.form.rowBy(tag: "customlogo") as? RowOf<String>,
-            let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>
+            let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>,
+            let backgroundRow = self.form.rowBy(tag: "custombackground") as? RowOf<String>,
+            let colorRow = self.form.rowBy(tag: "customcolor") as? RowOf<String>,
+            let roundnessRow = self.form.rowBy(tag: "logoroundness") as? SliderRow
         {
             
             var keychain = self.getKeyChain()
@@ -115,7 +142,7 @@ class OktaFormViewController: FormViewController {
                 redirectRow.value = keychain["redirectUri"] as! String
                 logoutRow.value = keychain["logout"] as! String
                 if(keychain["oktaurl"] != nil) {
-                oktaUrlRow.value = keychain["oktaurl"] as! String
+                    oktaUrlRow.value = keychain["oktaurl"] as! String
                 }
                 if(keychain["image"] != nil) {
                     imageUrlRow.value = keychain["image"]!.trimmingCharacters(in: .whitespaces)
@@ -123,11 +150,25 @@ class OktaFormViewController: FormViewController {
                 if(keychain["theme"] != nil) {
                     themeRow.value = keychain["theme"] as! String
                 }
+                if(keychain["custombackground"] != nil) {
+                    backgroundRow.value = keychain["custombackground"] as! String
+                }
+                if(keychain["customcolor"] != nil) {
+                    colorRow.value = keychain["customcolor"] as! String
+                }
+                if(keychain["logoroundness"] != nil) {
+                    var int = Int(keychain["logoroundness"]!)
+                    var float = Float(int!)
+                    roundnessRow.value = float
+                }
                 urlRow.reload()
                 clientIdRow.reload()
                 redirectRow.reload()
                 logoutRow.reload()
                 oktaUrlRow.reload()
+                backgroundRow.reload()
+                //colorRow.reload()
+                
             }
         }
     }

@@ -45,6 +45,7 @@ class ViewController: UIViewController {
         signIn.layer.cornerRadius = 4
         videoBackground()
         setCustomLogo()
+        setCustomColor()
     }
     
     func setCustomLogo() {
@@ -53,7 +54,23 @@ class ViewController: UIViewController {
               print(keychain["image"])
             if(keychain["image"] != nil) {
                 let url = URL(string: keychain["image"]!)
+                print("@@@@@@@@")
+                print(keychain["logoroundness"])
+                print("@@@@@@@@")
                 self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
+                if(keychain["logoroundness"] != nil) {
+                    self.logo.layer.masksToBounds = true
+                    self.logo.layer.cornerRadius = CGFloat(Int(keychain["logoroundness"]!)! * 10)
+                }
+            }
+        }
+    }
+    
+    func setCustomColor() {
+        DispatchQueue.main.async(){
+            var keychain = self.getKeyChain()
+            if(keychain["customcolor"] != nil) {
+                self.signIn.backgroundColor = self.hexStringToUIColor(hex: keychain["customcolor"]!)
             }
         }
     }
@@ -91,12 +108,34 @@ extension UIViewController {
             
         }
     }
+    
+    func hexStringToUIColor (hex:String) -> UIColor {
+        var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        
+        if (cString.hasPrefix("#")) {
+            cString.remove(at: cString.startIndex)
+        }
+        
+        if ((cString.count) != 6) {
+            return UIColor.gray
+        }
+        
+        var rgbValue:UInt32 = 0
+        Scanner(string: cString).scanHexInt32(&rgbValue)
+        
+        return UIColor(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
+        )
+    }
   
     
     func getOkta() -> OktaOidc {
         var config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://avb.oktapreview.com/oauth2/auskkfitx0l6SNY6R0h7",
+                "issuer": "s",
                 "clientId": "0oakkch04alb3cucj0h7",
                 "redirectUri": "com.oktapreview.avb:/callback",
                 "logoutRedirectUri": "com.oktapreview.avb:/callback",
