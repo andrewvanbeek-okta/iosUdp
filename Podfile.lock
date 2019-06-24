@@ -3,25 +3,25 @@ PODS:
   - Cards (1.4.0):
     - Player (= 0.13.0)
   - Eureka (5.0.0)
-  - IQKeyboardManager (6.2.1)
+  - IQKeyboardManager (6.4.0)
   - KeychainAccess (3.2.0)
-  - Kingfisher (5.4.0)
-  - MaterialComponents/AnimationTiming (83.0.1)
-  - MaterialComponents/Palettes (83.0.1)
-  - MaterialComponents/private/Application (83.0.1)
-  - MaterialComponents/private/Math (83.0.1)
-  - MaterialComponents/TextFields (83.0.1):
+  - Kingfisher (5.6.0)
+  - MaterialComponents/AnimationTiming (84.6.0)
+  - MaterialComponents/Palettes (84.6.0)
+  - MaterialComponents/private/Application (84.6.0)
+  - MaterialComponents/private/Math (84.6.0)
+  - MaterialComponents/TextFields (84.6.0):
     - MaterialComponents/AnimationTiming
     - MaterialComponents/Palettes
     - MaterialComponents/private/Math
     - MaterialComponents/Typography
     - MDFInternationalization
-  - MaterialComponents/Typography (83.0.1):
+  - MaterialComponents/Typography (84.6.0):
     - MaterialComponents/private/Application
     - MaterialComponents/private/Math
   - MDFInternationalization (2.0.0)
-  - OktaAuthSdk (1.0.0)
-  - OktaOidc (3.1.0)
+  - OktaAuthSdk (1.2.0)
+  - OktaOidc (3.2.0)
   - Player (0.13.0)
   - SCLAlertView (0.8)
   - SwiftVideoBackground (3.3.0)
@@ -35,7 +35,7 @@ DEPENDENCIES:
   - KeychainAccess
   - Kingfisher (~> 5.0)
   - MaterialComponents/TextFields
-  - OktaAuthSdk
+  - OktaAuthSdk (~> 1.2.0)
   - OktaOidc
   - SCLAlertView
   - SwiftVideoBackground
@@ -62,18 +62,18 @@ SPEC CHECKSUMS:
   Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
   Cards: 45ae6bd0eca7b5e8016d3b6cb30b60b04753f68f
   Eureka: 0f64f477ec8ef6201c6fec143d60ff5c201cf654
-  IQKeyboardManager: 964638372b4a61892cc74fdfa6fd26de8c9464a2
+  IQKeyboardManager: fcef267266379c003181fc3592f6bdb8bf4db839
   KeychainAccess: 3b1bf8a77eb4c6ea1ce9404c292e48f948954c6b
-  Kingfisher: 9c8f2cc6710334e06f32ba2b45e77707d5e2f0c9
-  MaterialComponents: 2363f5dab79a96d3958e6aaf49ec116e102d23dc
+  Kingfisher: 1a50df6880a60bae26f3e21a0df3d17b892f5e0b
+  MaterialComponents: 71139af6ca6875fbde8ab8e64a275b7fd6a22d7f
   MDFInternationalization: 010097556d6b09d2c4ea38e0820ea6d37be6a314
-  OktaAuthSdk: c7bf0888a83d0a68da4527ba4cb5299d39cb6f2c
-  OktaOidc: 0f0d9fd66b58de596d216ce3bdae4e1984d11129
+  OktaAuthSdk: a9d2fa832ac2fd3d31b407387b91d2a8743e8bc0
+  OktaOidc: 422be290e5dd4e5b3b830f64ba3b5339d0ea804b
   Player: 968d8d07d923bcdd6f7e4091c9e306eb44a5f7a4
   SCLAlertView: 6a77bb2edfc65e04dbe57725546cb4107a506b85
   SwiftVideoBackground: ebcc843d4cbcfc520e42472dad80925a6433da06
   SwiftyJSON: c29297daf073d2aa016295d5809cdd68045c39b3
 
-PODFILE CHECKSUM: c9fd3d01add20c6aacf34a327d47862d8d9f05c4
+PODFILE CHECKSUM: 2e2ffea13daf3c60ad51bac2963f9a3d13bf197b
 
 COCOAPODS: 1.7.0.beta.3

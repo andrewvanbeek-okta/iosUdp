@@ -1,0 +1,1 @@
+/tmp/TwelveTest.dst/Applications/TwelveTest.app

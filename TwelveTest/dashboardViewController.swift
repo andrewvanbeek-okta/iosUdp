@@ -12,6 +12,7 @@ import KeychainAccess
 import OktaOidc
 import SwiftyJSON
 
+
 class OktaDashboardViewController: FormViewController {
     
     struct FormItems {
@@ -24,10 +25,12 @@ class OktaDashboardViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
         var config = self.getConfig()
         config.clientId
         var okta = self.getOkta()
         print(okta)
+        
         guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
             print("no go")
             return

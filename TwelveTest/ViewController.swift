@@ -16,6 +16,8 @@ import SwiftyJSON
 
 class ViewController: UIViewController {
     
+
+    @IBOutlet weak var nativeSignIn: UIButton!
     @IBOutlet weak var logo: UIImageView!
     @IBAction func login(_ sender: Any) {
         var okta = self.getOkta()
@@ -24,6 +26,7 @@ class ViewController: UIViewController {
                 print(error)
                 return
             }
+           
             stateManager?.writeToSecureStorage()
             print(stateManager?.accessToken)
             print(stateManager?.idToken)
@@ -39,10 +42,13 @@ class ViewController: UIViewController {
             
         }
     }
+    
+    
     @IBOutlet weak var signIn: UIButton!
     override func viewDidLoad() {
         super.viewDidLoad()
         signIn.layer.cornerRadius = 4
+        nativeSignIn.layer.cornerRadius = 4
         videoBackground()
         setCustomLogo()
         setCustomColor()
@@ -71,6 +77,7 @@ class ViewController: UIViewController {
             var keychain = self.getKeyChain()
             if(keychain["customcolor"] != nil) {
                 self.signIn.backgroundColor = self.hexStringToUIColor(hex: keychain["customcolor"]!)
+                self.nativeSignIn.backgroundColor = self.hexStringToUIColor(hex: keychain["customcolor"]!)
             }
         }
     }
@@ -177,6 +184,7 @@ extension UIViewController {
                           encoding: URLEncoding(destination: .queryString))
     }
     
+    //get scratched
     func getApi() -> String {
         var keychain = self.getKeyChain()
         switch keychain["theme"] {
@@ -193,7 +201,18 @@ extension UIViewController {
         }
     }
     
-
+    func getSecondConfig() -> OktaOidcConfig {
+        var config = {
+            return try! OktaOidcConfig(with: [
+                "issuer": "https://avb.oktapreview.com/oauth2/auskkfitx0l6SNY6R0h7",
+                "clientId": "0oakkch04alb3cucj0h7",
+                "redirectUri": "https://avb.oktapreview.com/home/salesforce/0oajpukin5uziKspL0h7/24?fromHome=true",
+                "logoutRedirectUri": "com.oktapreview.avb:/callback",
+                "scopes": "openid profile offline_access"
+                ])
+        }()
+           return config
+    }
     
     
     
@@ -230,4 +249,6 @@ extension UIViewController {
     
     
 }
+
+
 

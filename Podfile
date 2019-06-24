@@ -10,7 +10,7 @@ pod 'SwiftVideoBackground'
 pod 'KeychainAccess'
 pod 'OktaOidc'
 pod 'Eureka', '~> 5.0'
-pod "OktaAuthSdk"
+pod 'OktaAuthSdk', '~> 1.2.0'
 pod 'IQKeyboardManager' 
 pod 'MaterialComponents/TextFields'
 pod 'SCLAlertView'
@@ -18,7 +18,7 @@ pod 'SwiftyJSON', '~> 4.1.0'
 pod 'Kingfisher', '~> 5.0'
 pod 'Alamofire'
 pod 'Cards'
- 
+
 
 
   target 'TwelveTestTests' do
