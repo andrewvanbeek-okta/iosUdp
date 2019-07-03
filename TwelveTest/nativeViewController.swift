@@ -32,6 +32,16 @@ class NativeViewController: UIViewController {
         videoBackground()
         setCustomLogo()
         setCustomColor()
+        self.username.textColor = UIColor.white
+        self.username.font = UIFont(name: self.username.font!.fontName, size: 24)
+        self.username.textAlignment = .center
+        self.password.textColor = UIColor.white
+        self.password.textAlignment = .center
+        self.password.font = UIFont(name: self.username.font!.fontName, size: 24)
+        self.username.placeholderLabel.textColor = UIColor.white
+        self.username.placeholderLabel.highlightedTextColor = UIColor.white
+        self.password.placeholderLabel.textColor = UIColor.white
+        self.password.placeholderLabel.highlightedTextColor = UIColor.white
     }
     
     @IBAction func login(_ sender: Any) {
@@ -45,7 +55,8 @@ class NativeViewController: UIViewController {
         print(self.password.text)
         var keychain = self.getKeyChain()
         var url = keychain["oktaurl"] as! String
-        OktaAuthSdk.authenticate(with: URL(string: "https://avb.oktapreview.com")!,
+        
+        OktaAuthSdk.authenticate(with: URL(string: url)!,
                                  username: username,
                                  password: password,
                                  onStatusChange: { authStatus in
@@ -55,19 +66,24 @@ class NativeViewController: UIViewController {
                                     self.handleError(error)
         })
         
+        
     }
     
     @IBOutlet weak var nativeSignInButton: UIButton!
     
     func setCustomLogo() {
         DispatchQueue.main.async(){
-            var keychain = self.getKeyChain()
-            print(keychain["image"])
+            let keychain = self.getKeyChain()
+            print(keychain["image"] as Any)
             if(keychain["image"] != nil) {
                 let url = URL(string: keychain["image"]!)
-                print("@@@@@@@@")
-                print(keychain["logoroundness"])
-                print("@@@@@@@@")
+                self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
+                if(keychain["logoroundness"] != nil) {
+                    self.logo.layer.masksToBounds = true
+                    self.logo.layer.cornerRadius = CGFloat(Int(keychain["logoroundness"]!)! * 10)
+                }
+            } else {
+                let url = URL(string: "https://www.okta.com/sites/all/themes/Okta/images/logos/developer/Dev_Logo-02_Large.png")
                 self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
                 if(keychain["logoroundness"] != nil) {
                     self.logo.layer.masksToBounds = true
@@ -187,7 +203,6 @@ class NativeViewController: UIViewController {
     }
     
     func handleSuccessStatus(sessionToken: String) {
-        print("######")
         //UIActivityIndicatorView.stopAnimating()
         var oktaOidc = self.getOkta()
         oktaOidc.authenticate(withSessionToken: sessionToken) { stateManager, error in

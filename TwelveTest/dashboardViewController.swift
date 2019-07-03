@@ -63,9 +63,13 @@ class OktaDashboardViewController: FormViewController {
                     }
                 }
                 section <<< ButtonRow() {
+                    $0.title = "SSO to Web App"
+                }.onCellSelection {  cell, row in
+                    self.ssoWebApp()
+                }
+                section <<< ButtonRow() {
                     $0.title = "Sign Out"
                     }.onCellSelection {  cell, row in
-                        
                         var keychain = self.getKeyChain()
                         var isNative = keychain[string: "native"]
                         if(isNative != nil) {
@@ -73,13 +77,12 @@ class OktaDashboardViewController: FormViewController {
                         } else {
                             var oktaOidc = self.getOkta()
                             oktaOidc.signOutOfOkta(stateManager, from: self) { error in
-                                print("NJANJSHBSHJNSJANJ")
                                 if let error = error {
                                     print(error)
                                     return
                                 }
-                                print("GETS Here")
                                 keychain["native"] = nil
+                                keychain["sso"] = nil
                                 DispatchQueue.main.async {
                                     let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
                                     if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "MainVc") as? UIViewController {

@@ -13,6 +13,7 @@ import KeychainAccess
 import Kingfisher
 import Alamofire
 import SwiftyJSON
+import SCLAlertView
 
 class ViewController: UIViewController {
     
@@ -33,6 +34,7 @@ class ViewController: UIViewController {
             print(stateManager?.refreshToken)
             DispatchQueue.main.async(){
                 var keychain = self.getKeyChain()
+                var sso = keychain["sso"] = "trueß"
                 keychain["native"] = nil
                 let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
                 if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "dataTab") as? UITabBarController {
@@ -42,6 +44,31 @@ class ViewController: UIViewController {
             
         }
     }
+    
+ 
+    
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        let keychain = self.getKeyChain()
+        let config = self.getConfig()
+        var sso = keychain["sso"]
+        if(sso != nil) {
+            guard let stateManager = OktaOidcStateManager.readFromSecureStorage(for: config) else {
+                return
+            }
+            print(stateManager.accessToken as Any)
+            print(stateManager.idToken as Any)
+            print(stateManager.refreshToken as Any)
+            DispatchQueue.main.async(){
+                let mainStoryboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+                if let viewController = mainStoryboard.instantiateViewController(withIdentifier: "dataTab") as? UITabBarController {
+                    self.present(viewController, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+    
     
     
     @IBOutlet weak var signIn: UIButton!
@@ -56,13 +83,17 @@ class ViewController: UIViewController {
     
     func setCustomLogo() {
         DispatchQueue.main.async(){
-            var keychain = self.getKeyChain()
-              print(keychain["image"])
+            let keychain = self.getKeyChain()
+            print(keychain["image"] as Any)
             if(keychain["image"] != nil) {
                 let url = URL(string: keychain["image"]!)
-                print("@@@@@@@@")
-                print(keychain["logoroundness"])
-                print("@@@@@@@@")
+                self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
+                if(keychain["logoroundness"] != nil) {
+                    self.logo.layer.masksToBounds = true
+                    self.logo.layer.cornerRadius = CGFloat(Int(keychain["logoroundness"]!)! * 10)
+                }
+            } else {
+                let url = URL(string: "https://www.okta.com/sites/all/themes/Okta/images/logos/developer/Dev_Logo-02_Large.png")
                 self.logo.kf.setImage(with: url, placeholder: UIImage(named: "vanbeeklabs.png"))
                 if(keychain["logoroundness"] != nil) {
                     self.logo.layer.masksToBounds = true
@@ -101,8 +132,20 @@ extension UIViewController {
     
     func addBackground() {
         var keychain = self.getKeyChain()
-        if(keychain["theme"] != nil) {
+        if(keychain["theme"] != nil && keychain["theme"] != "Default") {
             var theme = keychain["theme"]! + ".jpg"
+            print(theme)
+            let width = UIScreen.main.bounds.size.width
+            let height = UIScreen.main.bounds.size.height
+            let imageViewBackground = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+            imageViewBackground.image = UIImage(named: theme)
+            print("HERE")
+            imageViewBackground.contentMode = UIView.ContentMode.scaleAspectFill
+            self.view.addSubview(imageViewBackground)
+            self.view.sendSubviewToBack(imageViewBackground)
+            
+        } else {
+            var theme = "travel.jpg"
             print(theme)
             let width = UIScreen.main.bounds.size.width
             let height = UIScreen.main.bounds.size.height
@@ -168,6 +211,36 @@ extension UIViewController {
         return oktaOidc
     }
     
+    func getOktaWithIdp() -> OktaOidc {
+        var keychain = self.getKeyChain()
+        var config = {
+            return try! OktaOidcConfig(with: [
+                "issuer": "s",
+                "clientId": "0oakkch04alb3cucj0h7",
+                "redirectUri": "com.oktapreview.avb:/callback",
+                "logoutRedirectUri": "com.oktapreview.avb:/callback",
+                "scopes": "openid profile offline_access"
+                ])
+        }()
+        if(keychain["url"] != nil && keychain["idp"] != nil) {
+            config = {
+                return try! OktaOidcConfig(with: [
+                    "issuer": keychain["url"]!,
+                    "clientId": keychain["clientId"]!,
+                    "redirectUri": keychain["redirectUri"]!,
+                    "logoutRedirectUri": keychain["logout"]!,
+                    "scopes": "openid profile offline_access",
+                    "idp": keychain["idp"]!
+                    ])
+            }()
+        }
+        
+        var oktaOidc = {
+            return try! OktaOidc(configuration: config)
+        }()
+        return oktaOidc
+    }
+    
     func getKeyChain() -> Keychain {
         return Keychain(service: "com.avbGame.TwelveTest")
     }
@@ -202,16 +275,32 @@ extension UIViewController {
     }
     
     func getSecondConfig() -> OktaOidcConfig {
+        var keychain = self.getKeyChain()
         var config = {
             return try! OktaOidcConfig(with: [
-                "issuer": "https://avb.oktapreview.com/oauth2/auskkfitx0l6SNY6R0h7",
-                "clientId": "0oakkch04alb3cucj0h7",
-                "redirectUri": "https://avb.oktapreview.com/home/salesforce/0oajpukin5uziKspL0h7/24?fromHome=true",
-                "logoutRedirectUri": "com.oktapreview.avb:/callback",
+                "issuer": keychain["url"]!,
+                "clientId": keychain["clientId"]!,
+                "redirectUri": keychain["webappurl"] ?? "https://avb.oktapreview.com/home/salesforce/0oajpukin5uziKspL0h7/24?fromHome=true",
+                "logoutRedirectUri": keychain["logout"]!,
                 "scopes": "openid profile offline_access"
                 ])
         }()
            return config
+    }
+    
+    
+    
+    func ssoWebApp() {
+        var config = self.getSecondConfig()
+        var oktaOidc = {
+            return try! OktaOidc(configuration: config)
+        }()
+        oktaOidc.signInWithBrowser(from: self) { stateManager, error in
+            if let error = error {
+                print(error)
+                return
+            }
+        }
     }
     
     

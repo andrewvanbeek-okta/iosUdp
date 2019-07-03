@@ -17,12 +17,20 @@ class OktaFormViewController: FormViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        var keychain = self.getKeyChain()
+        let keychain = self.getKeyChain()
         var url = "https://vanbeeklabs-mobile.herokuapp.com"
         let parameters: Parameters = [
             "resource": "doctors"
         ]
-        let todoEndpoint: String = "https://safe-escarpment-74832.herokuapp.com/api/configs"
+        var todoEndpoint: String = "https://safe-escarpment-74832.herokuapp.com/api/configs"
+         var appetize = UserDefaults.standard.object(forKey: "isAppetize")
+        if(appetize != nil) {
+            var user_id = UserDefaults.standard.object(forKey: "user_id") as! String
+            if(user_id != nil) {
+                todoEndpoint = todoEndpoint + "/" + user_id
+                //add destroy filter "status": "ready"
+            }
+        }
         Alamofire.request(todoEndpoint)
             .responseJSON { response in
                 // check for errors
@@ -46,14 +54,21 @@ class OktaFormViewController: FormViewController {
                         $0.selectorTitle = "Pick App Config"
                         var options = Array<Any>()
                         configs.forEach { item in
-                            options.append(item["demo_app_name"].stringValue)
-                            var key = item["demo_app_name"].stringValue
-                            directConfigKeys[key] = item.dictionaryValue
+                            if(item["status"].stringValue == "ready") {
+                                options.append(item["demo_app_name"].stringValue + ": " + item["udp_subdomain"].stringValue)
+                                var key = item["demo_app_name"].stringValue + ": " + item["udp_subdomain"].stringValue
+                                directConfigKeys[key] = item.dictionaryValue
+                            }
                         }
                         $0.options = options as! [String]
                         $0.value = "Default"
                         $0.reload()
-                    }
+                        }.onChange() { row in
+                            var currentKey = row.value
+                            print(directConfigKeys[currentKey!])
+                            var configInfo = directConfigKeys[currentKey!]
+                            self.updateKeychain(info: configInfo as? Dictionary<String, Any>)
+                        }
                     <<< TextRow("clientId"){ row in
                         row.title = "client id"
                         row.placeholder = "Enter client id"
@@ -78,6 +93,10 @@ class OktaFormViewController: FormViewController {
                     <<< TextRow("customScopes"){ row in
                         row.title = "custom scopes"
                         row.placeholder = "Enter custom scopes"
+                    }
+                    <<< TextRow("WebApp"){ row in
+                        row.title = "okta embed link"
+                        row.placeholder = "Enter link"
                     }
                     +++ Section("Customization")
                     <<< TextRow("customlogo"){ row in
@@ -113,6 +132,9 @@ class OktaFormViewController: FormViewController {
                     
                                 let configurationRow = self.form.rowBy(tag: "configuration") as? RowOf<String>
                                 var currentKey = configurationRow!.value
+                                print(directConfigKeys)
+                                print(currentKey)
+                                print(directConfigKeys[currentKey!])
                                 var configInfo = directConfigKeys[currentKey!]
                                 self.updateKeychain(info: configInfo as? Dictionary<String, Any>)
                             
@@ -138,12 +160,14 @@ class OktaFormViewController: FormViewController {
             let imageUrlRow = self.form.rowBy(tag: "customlogo") as? RowOf<String>,
             let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>,
             let backgroundRow = self.form.rowBy(tag: "custombackground") as? RowOf<String>,
-            let colorRow = self.form.rowBy(tag: "customcolor") as? RowOf<String>
+            let colorRow = self.form.rowBy(tag: "customcolor") as? RowOf<String>,
+            let webAppRow = self.form.rowBy(tag: "WebApp") as? RowOf<String>
         {
             var keychain = self.getKeyChain()
             
             if(info != nil) {
                 var object = JSON(info)
+                //to do ready
                 keychain["url"] = object["issuer"].stringValue.trimmingCharacters(in: .whitespaces)
                 keychain["clientId"] = object["client_id"].stringValue.trimmingCharacters(in: .whitespaces)
                 keychain["oktaurl"] = object["base_url"].stringValue.trimmingCharacters(in: .whitespaces)
@@ -178,6 +202,9 @@ class OktaFormViewController: FormViewController {
             if(colorRow.value != nil) {
                 keychain["customcolor"] = colorRow.value!.trimmingCharacters(in: .whitespaces)
             }
+            if(webAppRow.value != nil) {
+                keychain["webappurl"] = webAppRow.value!.trimmingCharacters(in: .whitespaces)
+            }
             self.updateOktaValues()
         }
     }
@@ -192,7 +219,8 @@ class OktaFormViewController: FormViewController {
             let themeRow = self.form.rowBy(tag: "theme") as? RowOf<String>,
             let backgroundRow = self.form.rowBy(tag: "custombackground") as? RowOf<String>,
             let colorRow = self.form.rowBy(tag: "customcolor") as? RowOf<String>,
-            let roundnessRow = self.form.rowBy(tag: "logoroundness") as? SliderRow
+            let roundnessRow = self.form.rowBy(tag: "logoroundness") as? SliderRow,
+            let webAppRow = self.form.rowBy(tag: "WebApp") as? RowOf<String>
         {
             
             var keychain = self.getKeyChain()
@@ -221,6 +249,9 @@ class OktaFormViewController: FormViewController {
                     var float = Float(int!)
                     roundnessRow.value = float
                 }
+                if(keychain["webappurl"] != nil) {
+                    webAppRow.value = keychain["webappurl"] as! String
+                }
                 urlRow.reload()
                 clientIdRow.reload()
                 redirectRow.reload()
@@ -228,6 +259,7 @@ class OktaFormViewController: FormViewController {
                 oktaUrlRow.reload()
                 backgroundRow.reload()
                 colorRow.reload()
+                webAppRow.reload()
                 roundnessRow.reload()
                 
             }
